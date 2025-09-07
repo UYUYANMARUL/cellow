@@ -4,6 +4,7 @@ use U256::U256Bytes;
 
 global NUM_NON_ACCUMULATOR_PUBLIC_INPUTS: u32 = 34;
 
+
 use bb_proof_verification::{verify_ultrahonk_proof, UltraHonkProof, UltraHonkVerificationKey};
 use keccak256::keccak256;
 use merkle_tree::merkle_tree_checker;
@@ -42,8 +43,16 @@ fn main(
     nullifier: pub [u8; 32],
     nullifier_hash: pub [u8; 32],
     counterparty_commitment: [u8; 32],
-    amount: U256Bytes
-) -> pub (Balance, Balance) {
+    amount: U256Bytes,
+    receiver_commitment_hash:pub [u8; 32],
+    ttl:u8
+) -> pub (Balance, Balance,u8,U256Bytes) {
+
+    let (commitment, computed_nullifier_hash) = commitment_hasher(nullifier, secret);
+
+if(ttl == 0) {
+assert(receiver_commitment_hash == commitment)
+}
     // Verify the recursive proof
     verify_ultrahonk_proof(
         verification_key,
@@ -53,7 +62,6 @@ fn main(
     );
 
     // Verify our commitment and merkle inclusion
-    let (commitment, computed_nullifier_hash) = commitment_hasher(nullifier, secret);
     assert(computed_nullifier_hash == nullifier_hash);
     merkle_tree_checker(commitment, root, path, path_indices);
     
@@ -63,6 +71,15 @@ fn main(
     let mut receiver_balance_limbs: [u8; 32] = [0; 32];
     let mut sender_commitment_from_proof: [u8; 32] = [0; 32];
     let mut receiver_commitment_from_proof: [u8; 32] = [0; 32];
+
+    let mut computed_amount: [u8; 32] = [0; 32];
+
+    // Extract sender balance (first 32 fields)
+    for i in 0..32 {
+        computed_amount[i] = public_inputs[i + 128] as u8;
+    }
+
+    assert(amount == U256Bytes::new(computed_amount));
     
     // Extract sender balance (first 32 fields)
     for i in 0..32 {
@@ -108,5 +125,5 @@ fn main(
         owner_commitment: counterparty_commitment
     };
     
-    (sender_balance_result, receiver_balance_result)
+    (sender_balance_result, receiver_balance_result,ttl-1,amount)
 }
