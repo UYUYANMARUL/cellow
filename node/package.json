@@ -1,0 +1,16 @@
+{
+  "name": "cli",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "js-graph-algorithms": "^1.0.18",
+    "js-priority-queue": "^0.1.5"
+  }
+}

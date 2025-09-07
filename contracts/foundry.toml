@@ -1,0 +1,15 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib", "dependencies"]
+via_ir = true
+optimizer = true
+# As per v0.3.0 Custody size becomes a concern. The runs value should not be raised higher.
+optimizer_runs = 45000
+
+[dependencies]
+"@openzeppelin-contracts" = "5.0.0"
+
+# Use the below settings when compiling for Linea, as it is EVM-compatible pre-London only
+# evm_version = "london"
+# optimizer_runs = 27000
